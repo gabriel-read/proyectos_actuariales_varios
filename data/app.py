@@ -11,15 +11,25 @@ st.title("📠 Calculadora Actuarial")
 # =======================================================
 def detectar_archivo_por_defecto():
     folder = Path(__file__).parent
-    for ext in ("xlsx", "xlsm", "xls"):
-        p = folder / f"tabla_mortalidad.{ext}"
+
+    # 1) rutas preferidas (deploy-friendly)
+    preferidos = [
+        folder / "data" / "tabla_mortalidad.xlsx",
+        folder / "tabla_mortalidad.xlsx",
+    ]
+    for p in preferidos:
         if p.exists():
-            return p.name
+            return str(p)
+
+    # 2) búsqueda por patrón (por si lo renombraste)
     for ext in ("xlsx", "xlsm", "xls"):
-        candidatos = list(folder.glob(f"*mortalidad*.{ext}"))
+        candidatos = list(folder.rglob(f"*mortalidad*.{ext}"))
         if candidatos:
-            return candidatos[0].name
-    return "tabla_mortalidad.xlsx"
+            return str(candidatos[0])
+
+    # 3) fallback
+    return str(folder / "tabla_mortalidad.xlsx")
+
 
 ARCHIVO_DEFAULT = detectar_archivo_por_defecto()
 
