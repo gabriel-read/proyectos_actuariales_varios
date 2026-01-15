@@ -308,6 +308,191 @@ def loading_from_PT_PP(PT: float, PP: float) -> float:
     return (PT - PP) / PT
 
 # =======================================================
+# NUEVA FUNCIÓN: MOSTRAR RESUMEN (Pegada aquí)
+# =======================================================
+def mostrar_resumen_poliza(
+    *,
+    producto: str,
+    x: int,
+    n: int | None,
+    h: int | None,
+    m: int | None,
+    k: int | None,
+    capital: float | None,
+    R: float | None,
+    prima_anual: float,
+    r_pct: float | None,
+) -> None:
+    # =========================
+    # Helpers
+    # =========================
+    def money(v: float | None) -> str:
+        if v is None:
+            return "**$0.00**"
+        return f"**${v:,.2f}**"
+
+    def years(t: int | None, *, default_lifetime: str = "de por vida") -> str:
+        if t is None:
+            return f"**{default_lifetime}**"
+        if t == 0:
+            return "**0 años**"
+        return f"**{t} años**"
+
+    def edad_futura(base: int, delta: int | None) -> str:
+        if delta is None:
+            return f"**{base}**"
+        return f"**{base + delta}**"
+
+    def invers_text() -> str:
+        # m controla pago único vs periódico
+        if m is None or m == 0:
+            return f"💰 **Inversión:** Usted realiza un **pago único** de {money(prima_anual)} hoy."
+        return f"💰 **Inversión:** Usted realiza **pagos anuales** de {money(prima_anual)} durante {years(m)}."
+
+    def nota_var() -> str:
+        if producto.startswith("VG_") and r_pct is not None:
+            return f"\n\n📈 **Nota de indexación:** Este producto es indexado. El beneficio crece un **{r_pct:.2f}% anual** para proteger su poder adquisitivo."
+        return ""
+
+    def nota_fracc() -> str:
+        if ("FRAC_" in producto) or (k is not None):
+            return f"\n\n🧾 **Nota de frecuencia:** Cálculos ajustados a frecuencia **k={k}** (pagos fraccionados)."
+        return ""
+
+    # =========================
+    # Normalización de inputs
+    # =========================
+    n_eff = n
+    h_eff = 0 if (h is None) else h
+
+    # =========================
+    # Plantillas por grupo
+    # =========================
+    # GRUPO 1: AHORRO / SUPERVIVENCIA (PEN_SUP)
+    if producto == "SOB_DOTAL":
+        # Dotal puro: si vive cobra; si muere pierde
+        txt = (
+            "📄 **Nota Legal Simplificada — Propuesta de Seguro**\n\n"
+            "🎯 **Concepto:** Plan de Ahorro Objetivo (Sin devolución por fallecimiento).\n\n"
+            f"{invers_text()}\n\n"
+            f"✅ **Garantía de Vida:** Si usted vive hasta terminar el plazo de {years(n_eff)} recibirá el capital total de {money(capital)} para cumplir su meta.\n\n"
+            "🛡️ **Garantía de Fallecimiento:** ⚠️ Atención: Este es un producto de ahorro puro. "
+            "Si usted fallece antes de finalizar el plazo, **no hay devolución de primas ni pago de capital**. "
+            "Todo el fondo queda en la mutualidad para beneficiar a los sobrevivientes."
+        )
+        st.success(txt + nota_var() + nota_fracc())
+        return
+
+    if producto == "SOB_DOTAL_MIXTO":
+        # Endowment: paga si vive al final o si muere antes
+        txt = (
+            "📄 **Nota Legal Simplificada — Propuesta de Seguro**\n\n"
+            "🧩 **Concepto:** Plan Integral: Ahorro Garantizado + Protección Familiar.\n\n"
+            f"{invers_text()}\n\n"
+            f"✅ **Garantía de Vida:** Al finalizar el plazo de {years(n_eff)}, si usted vive, recibirá íntegramente {money(capital)}.\n\n"
+            f"🛡️ **Garantía de Fallecimiento:** Si llegara a faltar en cualquier momento antes de finalizar el plazo, "
+            f"sus beneficiarios recibirán la suma de {money(capital)} de forma inmediata. "
+            "La meta financiera se cumple **sí o sí**."
+        )
+        st.success(txt + nota_var() + nota_fracc())
+        return
+
+    # GRUPO 2: SEGUROS DE MUERTE (SEG_MUE)
+    if producto == "MUE_VIDA_ENTERA":
+        txt = (
+            "📄 **Nota Legal Simplificada — Propuesta de Seguro**\n\n"
+            "🏛️ **Concepto:** Legado Patrimonial Garantizado.\n\n"
+            f"{invers_text()}\n\n"
+            "✅ **Garantía de Vida:** Este seguro no tiene vencimiento. Mientras usted viva, mantiene la cobertura vigente.\n\n"
+            f"🛡️ **Garantía de Fallecimiento:** En el momento que ocurra su fallecimiento (hoy o dentro de muchos años), "
+            f"pagaremos {money(capital)} a sus herederos."
+        )
+        st.success(txt + nota_var() + nota_fracc())
+        return
+
+    if producto == "MUE_TEMPORAL":
+        txt = (
+            "📄 **Nota Legal Simplificada — Propuesta de Seguro**\n\n"
+            "🛡️ **Concepto:** Protección Pura por Plazo Definido.\n\n"
+            f"{invers_text()}\n\n"
+            f"✅ **Garantía de Vida:** Si usted sobrevive a {years(n_eff)}, la póliza termina **sin valor de rescate** "
+            "(funciona como un seguro de auto: usted pagó por la tranquilidad durante el periodo).\n\n"
+            f"🛡️ **Garantía de Fallecimiento:** Si fallece dentro de los próximos {years(n_eff)}, "
+            f"sus beneficiarios cobran {money(capital)}."
+        )
+        st.success(txt + nota_var() + nota_fracc())
+        return
+
+    if producto.startswith("MUE_DIF_"):
+        # Diferidos: vida entera diferido / temporal diferido
+        # Para temporal diferido, usa n; para vida entera diferido, n puede ser None
+        txt = (
+            "📄 **Nota Legal Simplificada — Propuesta de Seguro**\n\n"
+            "⏳ **Concepto:** Protección a Futuro (con periodo de espera).\n\n"
+            f"{invers_text()}\n\n"
+            f"⏳ **Garantía de Vida:** Usted cuenta con un periodo de espera de {years(h_eff)} donde **no hay cobertura**.\n\n"
+            f"🛡️ **Garantía de Fallecimiento:** La cobertura de {money(capital)} se activa únicamente si el fallecimiento "
+            f"ocurre **después** de los primeros {years(h_eff)} de espera."
+        )
+        st.info(txt + nota_var() + nota_fracc())
+        return
+
+    # GRUPO 3: PENSIONES / RENTAS (PEN_REN)
+    # Nota: prima_anual aquí es el capital/fondo para comprar la renta
+    if producto.endswith("_VITAL") and producto.startswith("REN_"):
+        # Vitalicias: anticipada o vencida
+        inicio = "comenzando **hoy**" if "AA" in producto else "comenzando **al final del primer periodo**"
+        txt = (
+            "📄 **Nota Legal Simplificada — Propuesta de Pensión**\n\n"
+            "🧓 **Concepto:** Jubilación Vitalicia Garantizada.\n\n"
+            f"💰 **Aporte / Capital (CCI):** A cambio de su capital acumulado de {money(prima_anual)}.\n\n"
+            f"✅ **Beneficio (Renta):** Nos comprometemos a pagarle una pensión de {money(R)} {inicio}.\n\n"
+            "🛡️ **Duración:** Estos pagos están garantizados **de por vida**, sin importar cuánto tiempo viva usted."
+        )
+        st.success(txt + nota_fracc())
+        return
+
+    if producto.endswith("_TEMP") and producto.startswith("REN_"):
+        inicio = "comenzando **hoy**" if "AA" in producto else "comenzando **al final del primer periodo**"
+        txt = (
+            "📄 **Nota Legal Simplificada — Propuesta de Pensión**\n\n"
+            "📆 **Concepto:** Renta por Plazo Fijo.\n\n"
+            f"💰 **Aporte / Capital (CCI):** A cambio de su capital acumulado de {money(prima_anual)}.\n\n"
+            f"✅ **Beneficio:** Recibirá una pensión de {money(R)} {inicio} durante los próximos {years(n_eff)}.\n\n"
+            f"⛔ **Condición:** Los pagos cesan si usted fallece o cuando se cumple el plazo de {years(n_eff)}, "
+            "lo que ocurra primero."
+        )
+        st.info(txt + nota_fracc())
+        return
+
+    if "_DIF_" in producto and producto.startswith("REN_"):
+        # Rentas diferidas (vital o temp, anticipada)
+        inicio = "desde el inicio del periodo" if "AA" in producto else "al final del periodo"
+        txt = (
+            "📄 **Nota Legal Simplificada — Propuesta de Pensión**\n\n"
+            "⏳ **Concepto:** Jubilación Planificada a Futuro.\n\n"
+            f"💰 **Aporte / Capital (CCI):** Usted aporta el capital hoy: {money(prima_anual)}.\n\n"
+            f"⏳ **Mecánica:** Los pagos de la pensión {money(R)} comenzarán dentro de {years(h_eff)} "
+            f"(cuando usted tenga {edad_futura(x, h_eff)} años), pagando {inicio}.\n\n"
+            "🛡️ **Nota:** Para que exista el pago, usted debe estar con vida al inicio de la renta."
+        )
+        st.info(txt + nota_fracc())
+        return
+
+    # GRUPO 4: CASOS ESPECIALES
+    # CAP_VAR (VG_) y FRACC ya añaden nota; si llega aquí, damos resumen genérico.
+    txt = (
+        "📄 **Nota Legal Simplificada — Resumen del Producto**\n\n"
+        f"💼 **Producto:** **{producto}**\n\n"
+        f"{invers_text()}\n\n"
+        f"⏳ **Plazo (n):** {years(n_eff)}\n"
+        f"⏳ **Diferimiento (h):** {years(h_eff)}\n\n"
+        "✅ **Nota:** Este resumen es una traducción amigable de resultados técnicos. "
+        "Para condiciones contractuales exactas, se debe emitir la póliza formal."
+    )
+    st.info(txt + nota_var() + nota_fracc())
+
+# =======================================================
 # Cargar base y construir conmutados
 # =======================================================
 try:
@@ -779,6 +964,44 @@ if st.sidebar.button("Calcular", key="btn_calc"):
             st.write(f"D_{x} = {D(tabla, x)}")
             st.write(f"N_{x} = {N(tabla, x)}")
             st.write(f"M_{x} = {M(tabla, x)}")
+
+        # =======================================================
+        # ✅ BLOQUE DE LLAMADA CORREGIDO (NUEVO)
+        # =======================================================
+        st.markdown("---")
+        st.subheader("📝 Resumen de su Póliza (Explicación Cliente)")
+
+        if es_capital:
+            # Regla: si hay plazo de pago (m_efectivo), la narrativa debe usar PPA (anual).
+            # Si NO hay plazo de pago (m_efectivo es None o 0), usa PPU (pago único).
+            prima_para_cliente = float(PPA) if (m_efectivo is not None and m_efectivo > 0) else float(PPU)
+
+            mostrar_resumen_poliza(
+                producto=producto,
+                x=x,
+                n=n,
+                h=h,
+                m=m_efectivo,   # esto controla el texto "pago único" vs "pagos anuales"
+                k=k,
+                capital=capital,
+                R=None,
+                prima_anual=prima_para_cliente,  # 👈 aquí va PPA o PPU según corresponda
+                r_pct=r_pct,
+            )
+        else:
+            # En rentas: prima_anual representa el capital/fondo necesario para comprar la pensión.
+            mostrar_resumen_poliza(
+                producto=producto,
+                x=x,
+                n=n,
+                h=h,
+                m=None,
+                k=k,
+                capital=None,
+                R=R,
+                prima_anual=float(total),  # total = capital/fondo requerido (según tu script)
+                r_pct=None,
+            )
 
     except Exception as e:
         st.error(str(e))
