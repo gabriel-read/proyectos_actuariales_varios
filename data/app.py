@@ -518,51 +518,51 @@ st.caption(f"Tabla cargada: {sexo}. Edades: 0 a {omega}. Convención: Cx = v^(x+
 st.sidebar.markdown("---")
 
 CATS = {
-    "PEN_SUP": "Pensiones (supervivencia / capitales en vida)",
-    "SEG_MUE": "Seguros (muerte)",
-    "PEN_REN": "Pensiones (rentas / anualidades)",
-    "CAP_VAR": "Capitales múltiples variables (progresión geométrica)",
-    "FRACC":   "Fraccionarios (según fórmulas)",
+    "PEN_SUP": "Ahorro y Supervivencia (Dotales)",
+    "SEG_MUE": "Seguros de Vida (Muerte)",
+    "PEN_REN": "Pensiones y Rentas (Anualidades)",
+    "CAP_VAR": "Productos con Aumento Anual (Indexados/Crecientes)",
+    "FRACC":   "Pagos Frecuentes (Mensuales, Semestrales...)",
 }
 
 OPCIONES = {
     "PEN_SUP": {
-        "Dotal puro (capital diferido)  _nE_x": "SOB_DOTAL",
-        "Dotal mixto (endowment)        A_endow": "SOB_DOTAL_MIXTO",
+        "Dotal puro (Si vive cobra, si muere pierde)  E(x,n)": "SOB_DOTAL",
+        "Dotal mixto (Ahorro garantizado + Seguro)    Endow(x,n)": "SOB_DOTAL_MIXTO",
     },
     "SEG_MUE": {
-        "Vida entera                 A_x": "MUE_VIDA_ENTERA",
-        "Temporal (plazo limitado)   A_{x:n}": "MUE_TEMPORAL",
-        "Diferido vida entera        _hA_x": "MUE_DIF_VIDA_ENTERA",
-        "Diferido y temporal         _hA_{x:n}": "MUE_DIF_TEMPORAL",
+        "Vida entera (Cubre siempre)             A(x)": "MUE_VIDA_ENTERA",
+        "Temporal (Cubre n años)                 A(x, n)": "MUE_TEMPORAL",
+        "Diferido vida entera (Espera h años)    A(x, h -> vida)": "MUE_DIF_VIDA_ENTERA",
+        "Diferido y temporal (Espera h, cubre n) A(x, h, n)": "MUE_DIF_TEMPORAL",
     },
     "PEN_REN": {
-        "Anticipada vitalicia                 ä_x": "REN_AA_VITAL",
-        "Anticipada temporal                  ä_{x:n}": "REN_AA_TEMP",
-        "Anticipada diferida vitalicia        _hä_x": "REN_AA_DIF_VITAL",
-        "Anticipada diferida temporal         _hä_{x:n}": "REN_AA_DIF_TEMP",
-        "Vencida vitalicia                    a_x": "REN_VEN_VITAL",
-        "Vencida temporal                     a_{x:n}": "REN_VEN_TEMP",
+        "Anticipada vitalicia (De por vida)      ä(x)": "REN_AA_VITAL",
+        "Anticipada temporal (Por n años)        ä(x, n)": "REN_AA_TEMP",
+        "Anticipada diferida vitalicia           ä(x, h -> vida)": "REN_AA_DIF_VITAL",
+        "Anticipada diferida temporal            ä(x, h, n)": "REN_AA_DIF_TEMP",
+        "Vencida vitalicia (Pago a fin de año)   a(x)": "REN_VEN_VITAL",
+        "Vencida temporal (Pago a fin de año)    a(x, n)": "REN_VEN_TEMP",
     },
     "CAP_VAR": {
-        "Vida variable: inmediato y plazo limitado": "VG_VIDA_IM_LIM",
-        "Vida variable: inmediato sin límite": "VG_VIDA_IM_WL",
-        "Vida variable: diferido y plazo limitado": "VG_VIDA_DIF_LIM",
-        "Vida variable: diferido sin límite": "VG_VIDA_DIF_WL",
-        "Muerte variable: inmediato y plazo limitado": "VG_MUE_IM_LIM",
-        "Muerte variable: inmediato sin límite": "VG_MUE_IM_WL",
-        "Muerte variable: diferido y plazo limitado": "VG_MUE_DIF_LIM",
-        "Muerte variable: diferido sin límite": "VG_MUE_DIF_WL",
+        "Vida Creciente: Inmediato por n años": "VG_VIDA_IM_LIM",
+        "Vida Creciente: Inmediato Vitalicio": "VG_VIDA_IM_WL",
+        "Vida Creciente: Diferido por n años": "VG_VIDA_DIF_LIM",
+        "Vida Creciente: Diferido Vitalicio": "VG_VIDA_DIF_WL",
+        "Muerte Creciente: Inmediato por n años": "VG_MUE_IM_LIM",
+        "Muerte Creciente: Inmediato Vitalicio": "VG_MUE_IM_WL",
+        "Muerte Creciente: Diferido por n años": "VG_MUE_DIF_LIM",
+        "Muerte Creciente: Diferido Vitalicio": "VG_MUE_DIF_WL",
     },
     "FRACC": {
-        "Renta anticipada temporal fraccionaria                 ä^(k)_{x:n}": "FRAC_REN_AA_TEMP",
-        "Renta anticipada vitalicia fraccionaria                ä^(k)_x": "FRAC_REN_AA_VITAL",
-        "Renta diferida temporal fraccionaria                   _hä^(k)_{x:n}": "FRAC_REN_DIF_TEMP",
-        "Renta diferida sin límite fraccionaria                 _hä^(k)_x": "PEN_FRAC_REN_DIF_WL",
-        "Seguro de muerte fracc: inmediato limitado             A^(k)_{x:n}": "FRAC_MUE_IM_LIM",
-        "Seguro de muerte fracc: inmediato sin límite           A^(k)_x": "FRAC_MUE_IM_WL",
-        "Seguro de muerte fracc: diferido limitado              _hA^(k)_{x:n}": "FRAC_MUE_DIF_LIM",
-        "Seguro de muerte fracc: diferido sin límite            _hA^(k)_x": "FRAC_MUE_DIF_WL",
+        "Renta Anticipada Temporal (Mensual/k)   ä(x, n, k)": "FRAC_REN_AA_TEMP",
+        "Renta Anticipada Vitalicia (Mensual/k)  ä(x, k)": "FRAC_REN_AA_VITAL",
+        "Renta Diferida Temporal (Mensual/k)     ä(x, h, n, k)": "FRAC_REN_DIF_TEMP",
+        "Renta Diferida Vitalicia (Mensual/k)    ä(x, h, k)": "PEN_FRAC_REN_DIF_WL",
+        "Seguro Muerte: Inmediato Temporal       A(x, n, k)": "FRAC_MUE_IM_LIM",
+        "Seguro Muerte: Inmediato Vitalicio      A(x, k)": "FRAC_MUE_IM_WL",
+        "Seguro Muerte: Diferido Temporal        A(x, h, n, k)": "FRAC_MUE_DIF_LIM",
+        "Seguro Muerte: Diferido Vitalicio       A(x, h, k)": "FRAC_MUE_DIF_WL",
     }
 }
 
@@ -867,12 +867,14 @@ if st.sidebar.button("Calcular", key="btn_calc"):
             total = float(capital * val_unit)
             st.markdown("### 🏢 Costo técnico (capital)")
             st.write(f"**Valor actuarial por unidad (C=1):** {val_unit:.10f}")
-            st.write(f"**VPA total (C = {capital:,.2f}):** {total:,.6f}")
+            # AQUÍ ESTÁ EL CAMBIO DE TEXTO:
+            st.write(f"**VPA (Valor Presente Actuarial) total (C = {capital:,.2f}):** {total:,.6f}")
         else:
             total = float(R * val_unit)
             st.markdown("### 🏢 Costo técnico (renta / anualidad)")
             st.write(f"**Factor por unidad de renta (R=1):** {val_unit:.10f}")
-            st.write(f"**VPA total (R = {R:,.2f} por periodo):** {total:,.6f}")
+            # AQUÍ ESTÁ EL CAMBIO DE TEXTO:
+            st.write(f"**VPA (Valor Presente Actuarial) total (R = {R:,.2f} por periodo):** {total:,.6f}")
 
         # ------------------- Primas netas y PT (solo capital) -------------------
         if es_capital:
@@ -955,10 +957,18 @@ if st.sidebar.button("Calcular", key="btn_calc"):
         with st.expander("Ver fórmula usada"):
             st.latex(formula)
 
-        with st.expander("Ver funciones base E y A(x;t;1) (t=0,1,2)"):
+# CAMBIO EN EL TÍTULO DEL EXPANDER Y EXPLICACIÓN INTERNA
+        with st.expander("Ver Factores Base: Riesgo Anual de Vida (E) vs Muerte (A)"):
+            st.info(
+                """
+                **Explicación de los factores:**
+                * **E(x, t):** Es el valor hoy de pagar $1 en el futuro (año t), **solo si la persona VIVE**. (Es la esencia de las Pensiones).
+                * **A(x, t):** Es el costo hoy de asegurar $1 si la persona **MUERE** en ese año específico. (Es la esencia de los Seguros).
+                """
+            )
             for t in [0, 1, 2]:
                 if x + t + 1 <= omega:
-                    st.write(f"t={t}: E(x;t)={E_xt(tabla, x, t, i):.10f} | A(x;t;1)={A_x_t1(tabla, x, t, i):.10f}")
+                    st.write(f"**Año {t} (Edad {x+t}):** E = {E_xt(tabla, x, t, i):.6f} (Si vive) | A = {A_x_t1(tabla, x, t, i):.6f} (Si muere)")
 
         with st.expander("Ver conmutados en la edad x"):
             st.write(f"D_{x} = {D(tabla, x)}")
