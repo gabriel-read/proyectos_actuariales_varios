@@ -308,7 +308,7 @@ def loading_from_PT_PP(PT: float, PP: float) -> float:
     return (PT - PP) / PT
 
 # =======================================================
-# NUEVA FUNCIÓN: MOSTRAR RESUMEN (Pegada aquí)
+# FUNCIÓN DE RESUMEN (Traducción al cliente)
 # =======================================================
 def mostrar_resumen_poliza(
     *,
@@ -677,7 +677,7 @@ if es_seguro_capital:
         m = None  # vitalicio
 
 # =======================================================
-# Prima de Tarifa (PT) y loading (con lambda)
+# Prima de Tarifa (PT) y loading (Teoría de Gastos)
 # =======================================================
 st.sidebar.markdown("---")
 calcular_PT = False
@@ -685,24 +685,37 @@ alpha = beta = gamma = delta = lamb = 0.0
 umbral_loading = 30.0
 
 if es_seguro_capital:
-    st.sidebar.subheader("Prima de tarifa (PT) y loading")
-    calcular_PT = st.sidebar.checkbox("Calcular PT + loading", value=False, key="calcular_PT")
+    st.sidebar.subheader("Prima de Tarifa (Gastos y Utilidad)")
+    calcular_PT = st.sidebar.checkbox("Incluir Gastos (Loading)", value=False, key="calcular_PT")
+    
     if calcular_PT:
-        st.sidebar.caption("α,β,γ,δ,λ en %, según tu definición (sobre C, PT, beneficio).")
+        st.sidebar.info("Configure los gastos según la matriz de carga (Iniciales vs. Periódicos).")
 
-        alpha_pct = float(st.sidebar.number_input("α (% sobre C)", min_value=0.0, max_value=1000.0, value=0.0, step=0.5, key="alpha_pct"))
-        beta_pct  = float(st.sidebar.number_input("β (% sobre C por pago)", min_value=0.0, max_value=1000.0, value=0.0, step=0.5, key="beta_pct"))
-        gamma_pct = float(st.sidebar.number_input("γ (% del primer PT)", min_value=0.0, max_value=1000.0, value=0.0, step=0.5, key="gamma_pct"))
-        delta_pct = float(st.sidebar.number_input("δ (% de cada PT)", min_value=0.0, max_value=1000.0, value=0.0, step=0.5, key="delta_pct"))
-        lamb_pct  = float(st.sidebar.number_input("λ (% sobre el siniestro/beneficio)", min_value=0.0, max_value=1000.0, value=0.0, step=0.5, key="lamb_pct"))
+        # 1. Gastos Iniciales (Alpha y Gamma)
+        st.sidebar.markdown("##### 1. Gastos INICIALES (Sólo al inicio)")
+        st.sidebar.caption("Gastos de colocación, emisión, adquisición.")
+        alpha_pct = float(st.sidebar.number_input("α (% s/ Capital Asegurado)", min_value=0.0, max_value=100.0, value=0.0, step=0.1, help="Gasto inicial sobre la Suma Asegurada (ej. Gastos de emisión)."))
+        gamma_pct = float(st.sidebar.number_input("γ (% s/ Prima de Tarifa)", min_value=0.0, max_value=100.0, value=0.0, step=0.1, help="Gasto inicial sobre la prima (ej. Comisión inicial agente)."))
 
+        # 2. Gastos Periódicos (Beta y Delta)
+        st.sidebar.markdown("##### 2. Gastos PERIÓDICOS (Durante el pago)")
+        st.sidebar.caption("Gastos de administración, cobro, mantenimiento.")
+        beta_pct  = float(st.sidebar.number_input("β (% s/ Capital Asegurado)", min_value=0.0, max_value=100.0, value=0.0, step=0.1, help="Gasto anual sobre la Suma Asegurada (ej. Administración)."))
+        delta_pct = float(st.sidebar.number_input("δ (% s/ Prima de Tarifa)", min_value=0.0, max_value=100.0, value=0.0, step=0.1, help="Gasto anual sobre la prima (ej. Gastos de cobranza)."))
+
+        # 3. Utilidad / Margen de seguridad (Lambda)
+        st.sidebar.markdown("##### 3. Margen de Seguridad")
+        lamb_pct  = float(st.sidebar.number_input("λ (% s/ Siniestro)", min_value=0.0, max_value=100.0, value=0.0, step=0.1, help="Recargo de seguridad sobre la probabilidad de muerte."))
+
+        # Conversión a decimales
         alpha = alpha_pct / 100.0
         beta  = beta_pct / 100.0
         gamma = gamma_pct / 100.0
         delta = delta_pct / 100.0
         lamb  = lamb_pct / 100.0
 
-        umbral_loading = float(st.sidebar.number_input("Umbral de loading (%) para alertar", min_value=0.0, max_value=100.0, value=30.0, step=1.0, key="umbral_loading"))
+        st.sidebar.markdown("---")
+        umbral_loading = float(st.sidebar.number_input("Alerta de Loading excesivo (%)", min_value=0.0, max_value=100.0, value=30.0, step=1.0))
 
 # =======================================================
 # Botón calcular
@@ -867,13 +880,11 @@ if st.sidebar.button("Calcular", key="btn_calc"):
             total = float(capital * val_unit)
             st.markdown("### 🏢 Costo técnico (capital)")
             st.write(f"**Valor actuarial por unidad (C=1):** {val_unit:.10f}")
-            # AQUÍ ESTÁ EL CAMBIO DE TEXTO:
             st.write(f"**VPA (Valor Presente Actuarial) total (C = {capital:,.2f}):** {total:,.6f}")
         else:
             total = float(R * val_unit)
             st.markdown("### 🏢 Costo técnico (renta / anualidad)")
             st.write(f"**Factor por unidad de renta (R=1):** {val_unit:.10f}")
-            # AQUÍ ESTÁ EL CAMBIO DE TEXTO:
             st.write(f"**VPA (Valor Presente Actuarial) total (R = {R:,.2f} por periodo):** {total:,.6f}")
 
         # ------------------- Primas netas y PT (solo capital) -------------------
@@ -903,6 +914,7 @@ if st.sidebar.button("Calcular", key="btn_calc"):
                     st.write(f"ä^(12) (mensual, Woolhouse) = {a_prem_mensual:.10f}")
 
                 if calcular_PT:
+                    # Cálculo matemático (Usamos tu función existente, que es matemáticamente equivalente)
                     PT_anual = float(prima_tarifa_PV(
                         B_unit=val_unit,
                         capital=capital,
@@ -911,22 +923,55 @@ if st.sidebar.button("Calcular", key="btn_calc"):
                     ))
                     L = float(loading_from_PT_PP(PT_anual, PPA))
 
-                    st.markdown("### 🧾 Prima de tarifa (PT) y carga (loading)")
-                    st.write(f"**PP (prima pura anual):** {PPA:,.6f}")
-                    st.write(f"**PT (prima de tarifa anual):** {PT_anual:,.6f}")
-                    st.write(f"**PT mensual (referencia, PT/12):** {(PT_anual/12.0):,.6f}")
-                    st.write(f"**Loading:** {100*L:.2f}%  ( (PT - PP) / PT )")
+                    st.markdown("### 🧾 Prima de Tarifa (PT) y Desglose de Gastos")
+                    
+                    # Métricas principales
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("Prima Pura (PPA)", f"{PPA:,.2f}")
+                    c2.metric("Prima Tarifa (PT)", f"{PT_anual:,.2f}")
+                    c3.metric("Loading (Carga)", f"{L*100:.2f}%", delta_color="inverse")
 
                     if PT_anual < PPA:
-                        st.error("⚠️ PT < PP: se vendería por debajo de la prima pura → pérdida esperada.")
+                        st.error("⚠️ Error Crítico: La Prima de Tarifa es menor que la Prima Pura. Revise los parámetros (delta muy alto).")
                     if (100*L) > umbral_loading:
-                        st.warning(f"⚠️ Loading = {100*L:.2f}% supera el umbral de {umbral_loading:.0f}%.")
+                        st.warning(f"⚠️ Alerta: Los gastos representan el {100*L:.1f}% de la prima. Verifique si es competitivo.")
 
-                    with st.expander("Desglose de PT (PV)"):
-                        st.write(f"Beneficio unitario B = {val_unit:.10f}")
-                        st.write(f"λ={lamb:.6f}, α={alpha:.6f}, β={beta:.6f}, γ={gamma:.6f}, δ={delta:.6f}")
-                        st.write(f"ä primas = {a_prem_anual:.10f}")
-                        st.latex(r"PT=\frac{C\cdot B\cdot(1+\lambda)+\alpha C+\beta C\cdot \ddot a}{(1-\delta)\ddot a-\gamma}")
+                    # =======================================================
+                    # VISUALIZACIÓN TEÓRICA (EXACTA A TU CLASE)
+                    # =======================================================
+                    with st.expander("📘 Ver Fórmula de Cálculo y Matriz de Gastos (Teoría)", expanded=False):
+                        st.markdown("#### 1. Matriz de Gastos Definida")
+                        # Creamos un DataFrame para mostrar la matriz tal cual la imagen
+                        df_gastos = pd.DataFrame(
+                            [
+                                [f"α = {alpha_pct}%", f"β = {beta_pct}%"],
+                                [f"γ = {gamma_pct}%", f"δ = {delta_pct}%"]
+                            ],
+                            columns=["Iniciales (Una vez)", "Periódicos (Anuales)"],
+                            index=["Sobre Capital (C)", "Sobre Prima (PT)"]
+                        )
+                        st.table(df_gastos)
+
+                        st.markdown("#### 2. Fórmula de Cálculo")
+                        st.write("Aplicando la fórmula de amortización de gastos:")
+                        
+                        # Preparamos los valores para mostrar en la fórmula
+                        # a^-1 es 1 / a_prem_anual
+                        inv_a = 1.0 / a_prem_anual if a_prem_anual > 0 else 0
+                        
+                        # LaTeX exacto a tu imagen
+                        st.latex(r"""
+                        PT_{x:n} = \frac{P(x;n) + \alpha \cdot \ddot{a}^{-1}_{x:0:n} + \beta}{1 - \gamma \cdot \ddot{a}^{-1}_{x:0:n} - \delta}
+                        """)
+                        
+                        st.markdown("**Donde:**")
+                        st.markdown(f"* **P(x;n):** Prima Pura Anual = `{PPA:,.4f}`")
+                        st.markdown(f"* **Cuota de amortización** ($\\ddot{a}^{{-1}}$): $1 / {a_prem_anual:.4f} = $ `{inv_a:.6f}`")
+                        st.markdown(f"* **Gastos s/Capital:** $\\alpha={alpha}, \\beta={beta}$")
+                        st.markdown(f"* **Gastos s/Prima:** $\\gamma={gamma}, \\delta={delta}$")
+                        
+                        st.markdown("---")
+                        st.markdown(f"**Cálculo del Loading:** $[ PT - PP ] / PT = $ `{L*100:.4f}%`")
 
         # ------------------- Extras -------------------
         st.markdown("### 🔎 Extras (para entender el riesgo)")
@@ -957,13 +1002,12 @@ if st.sidebar.button("Calcular", key="btn_calc"):
         with st.expander("Ver fórmula usada"):
             st.latex(formula)
 
-# CAMBIO EN EL TÍTULO DEL EXPANDER Y EXPLICACIÓN INTERNA
         with st.expander("Ver Factores Base: Riesgo Anual de Vida (E) vs Muerte (A)"):
             st.info(
                 """
                 **Explicación de los factores:**
-                * **E(x, t):** Es el valor hoy de pagar $1 en el futuro (año t), **solo si la persona VIVE**. (Es la esencia de las Pensiones).
-                * **A(x, t):** Es el costo hoy de asegurar $1 si la persona **MUERE** en ese año específico. (Es la esencia de los Seguros).
+                * **E(x, t):** Es el valor hoy de pagar $1 en el futuro (año t), **solo si la persona VIVE**. (Es el ladrillo de las Pensiones).
+                * **A(x, t):** Es el costo hoy de asegurar $1 si la persona **MUERE** en ese año específico. (Es el ladrillo de los Seguros).
                 """
             )
             for t in [0, 1, 2]:
@@ -976,7 +1020,7 @@ if st.sidebar.button("Calcular", key="btn_calc"):
             st.write(f"M_{x} = {M(tabla, x)}")
 
         # =======================================================
-        # ✅ BLOQUE DE LLAMADA CORREGIDO (NUEVO)
+        # ✅ BLOQUE DE LLAMADA CORREGIDO
         # =======================================================
         st.markdown("---")
         st.subheader("📝 Resumen de su Póliza (Explicación Cliente)")
