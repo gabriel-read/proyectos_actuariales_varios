@@ -308,7 +308,7 @@ def loading_from_PT_PP(PT: float, PP: float) -> float:
     return (PT - PP) / PT
 
 # =======================================================
-# FUNCIÓN DE RESUMEN (Traducción al cliente)
+# NUEVA FUNCIÓN: MOSTRAR RESUMEN (Pegada aquí)
 # =======================================================
 def mostrar_resumen_poliza(
     *,
@@ -677,6 +677,9 @@ if es_seguro_capital:
         m = None  # vitalicio
 
 # =======================================================
+# Prima de Tarifa (PT) y loading (con lambda)
+# =======================================================
+# =======================================================
 # Prima de Tarifa (PT) y loading (Teoría de Gastos)
 # =======================================================
 st.sidebar.markdown("---")
@@ -880,11 +883,13 @@ if st.sidebar.button("Calcular", key="btn_calc"):
             total = float(capital * val_unit)
             st.markdown("### 🏢 Costo técnico (capital)")
             st.write(f"**Valor actuarial por unidad (C=1):** {val_unit:.10f}")
+            # AQUÍ ESTÁ EL CAMBIO DE TEXTO:
             st.write(f"**VPA (Valor Presente Actuarial) total (C = {capital:,.2f}):** {total:,.6f}")
         else:
             total = float(R * val_unit)
             st.markdown("### 🏢 Costo técnico (renta / anualidad)")
             st.write(f"**Factor por unidad de renta (R=1):** {val_unit:.10f}")
+            # AQUÍ ESTÁ EL CAMBIO DE TEXTO:
             st.write(f"**VPA (Valor Presente Actuarial) total (R = {R:,.2f} por periodo):** {total:,.6f}")
 
         # ------------------- Primas netas y PT (solo capital) -------------------
@@ -966,7 +971,7 @@ if st.sidebar.button("Calcular", key="btn_calc"):
                         
                         st.markdown("**Donde:**")
                         st.markdown(f"* **P(x;n):** Prima Pura Anual = `{PPA:,.4f}`")
-                        st.markdown(f"* **Cuota de amortización** ($\\ddot{a}^{{-1}}$): $1 / {a_prem_anual:.4f} = $ `{inv_a:.6f}`")
+                        st.markdown(f"* **Cuota de amortización** ($\\ddot{{a}}^{{-1}}$): $1 / {a_prem_anual:.4f} = $ `{inv_a:.6f}`")
                         st.markdown(f"* **Gastos s/Capital:** $\\alpha={alpha}, \\beta={beta}$")
                         st.markdown(f"* **Gastos s/Prima:** $\\gamma={gamma}, \\delta={delta}$")
                         
@@ -1002,12 +1007,13 @@ if st.sidebar.button("Calcular", key="btn_calc"):
         with st.expander("Ver fórmula usada"):
             st.latex(formula)
 
+# CAMBIO EN EL TÍTULO DEL EXPANDER Y EXPLICACIÓN INTERNA
         with st.expander("Ver Factores Base: Riesgo Anual de Vida (E) vs Muerte (A)"):
             st.info(
                 """
                 **Explicación de los factores:**
-                * **E(x, t):** Es el valor hoy de pagar $1 en el futuro (año t), **solo si la persona VIVE**. (Es el ladrillo de las Pensiones).
-                * **A(x, t):** Es el costo hoy de asegurar $1 si la persona **MUERE** en ese año específico. (Es el ladrillo de los Seguros).
+                * **E(x, t):** Es el valor hoy de pagar $1 en el futuro (año t), **solo si la persona VIVE**. (Es la esencia de las Pensiones).
+                * **A(x, t):** Es el costo hoy de asegurar $1 si la persona **MUERE** en ese año específico. (Es la esencia de los Seguros).
                 """
             )
             for t in [0, 1, 2]:
@@ -1020,7 +1026,7 @@ if st.sidebar.button("Calcular", key="btn_calc"):
             st.write(f"M_{x} = {M(tabla, x)}")
 
         # =======================================================
-        # ✅ BLOQUE DE LLAMADA CORREGIDO
+        # ✅ BLOQUE DE LLAMADA CORREGIDO (NUEVO)
         # =======================================================
         st.markdown("---")
         st.subheader("📝 Resumen de su Póliza (Explicación Cliente)")
