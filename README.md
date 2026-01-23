@@ -1,3 +1,4 @@
+Link: https://calculadorasegurosypensiones.streamlit.app/
 # proyectos_actuariales_varios
 
 Suite de mini-proyectos actuariales en **Python + Streamlit** para valoración de **SEGUROS (muerte)** y **PENSIONES (vida/supervivencia)**, basada en **tablas de mortalidad** y **funciones conmutadas** (D, N, M).  
